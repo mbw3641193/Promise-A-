@@ -47,6 +47,14 @@ class Promise {
     }
 
     then(fulfilledCB, rejectedCB) {
+        if( typeof fulfilledCB !== 'function' ){ //如果不传成功的回调
+            fulfilledCB = result => result      //简写，相当于 result => { return result }
+        }
+        if( typeof rejectedCB !== 'function' ){ //如果不传错误的回调
+            rejectedCB = reason => {
+                throw new Error(reason.message);  //thorw不支持简写
+            }
+        }
         return new Promise((resolve, reject) => {  //实现then的链式写法
             this.fulfilledContainer.push((val) => {
                 try {
@@ -57,7 +65,7 @@ class Promise {
                         x.then(resolve, reject); //如果是Promise的实例，那么Promise实例本身存在成功与失败，成功走resolve，失败走reject
                         return;
                     }
-
+                    
                     resolve(x);                 //如果不是Promise实例，直接返回值就可以了，下个then直接就接收这个值，不存在失败
                 } catch (err) {
                     reject(err);
@@ -83,6 +91,10 @@ class Promise {
 
         // this.fulfilledContainer.push(fulfilledCB);
         // this.rejectedContainer.push(rejectedCB);
+    }
+
+    catch(rejectedCB){   //catch相当于then方法第一个参数不传，只穿第二个
+        return this.then(null,rejectedCB);
     }
 }
 

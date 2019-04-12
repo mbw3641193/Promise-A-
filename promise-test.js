@@ -6,17 +6,15 @@ new Promise((resolve, reject) => {
     resolve(100);
     reject(200);
 
-}).then(() => {
+}).then((result)=>{
     console.log(1);
-    return new Promise((resolve, reject) => {
-        // throw new Error('123');
-        reject(200);
-
-    })
-}, () => {
+    console.log(result);
+    return result;
+},() => {
     console.log(2);
-}).then(() => {
+}).then((result) => {
     console.log(4);
+    console.log(result);
 }, () => {
     console.log(5);
 })
