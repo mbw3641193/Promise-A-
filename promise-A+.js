@@ -17,9 +17,9 @@ class Promise {
                 this.value = result;
                 this.fulfilledContainer.forEach(item => {
                     item(this.value);  //遍历then中的方法，并把result传给then
-                }) 
+                })
             }, 0);
-            
+
         };
 
         //reject   代表失败
@@ -36,9 +36,9 @@ class Promise {
         };
 
         //异常捕获
-        try{
+        try {
             excutorCB(resolve, reject);
-        }catch(err){
+        } catch (err) {
             //有异常信息就按照rejected状态处理
             reject(err);
         }
@@ -46,9 +46,43 @@ class Promise {
         // excutorCB(resolve, reject);
     }
 
-    then(fulfilledCB,rejectedCB){
-        this.fulfilledContainer.push(fulfilledCB);
-        this.rejectedContainer.push(rejectedCB);
+    then(fulfilledCB, rejectedCB) {
+        return new Promise((resolve, reject) => {  //实现then的链式写法
+            this.fulfilledContainer.push((val) => {
+                try {
+                    let x = fulfilledCB(val);
+                    // console.log(val === this.value);
+
+                    if (x instanceof Promise) {   //检查x是不是Promise实例
+                        x.then(resolve, reject); //如果是Promise的实例，那么Promise实例本身存在成功与失败，成功走resolve，失败走reject
+                        return;
+                    }
+
+                    resolve(x);                 //如果不是Promise实例，直接返回值就可以了，下个then直接就接收这个值，不存在失败
+                } catch (err) {
+                    reject(err);
+                }
+
+            });
+            this.rejectedContainer.push((val) => {
+                try {
+                    let x = rejectedCB(val);
+
+                    if (x instanceof Promise) {   //检查x是不是Promise实例
+                        x.then(resolve, reject); //如果是Promise的实例，那么Promise实例本身存在成功与失败，成功走resolve，失败走reject
+                        return;
+                    }
+
+                    resolve(x);                 //如果不是Promise实例，直接返回值就可以了，下个then直接就接收这个值，不存在失败
+                } catch (err) {
+                    reject(err);
+                }
+            });
+
+        })
+
+        // this.fulfilledContainer.push(fulfilledCB);
+        // this.rejectedContainer.push(rejectedCB);
     }
 }
 
